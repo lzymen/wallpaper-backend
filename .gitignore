@@ -1,0 +1,22 @@
+# --- 敏感信息 ---
+.env
+
+
+# --- Python 垃圾文件 ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- IDE 设置 ---
+.idea/
+.vscode/
+*.swp
+
+# --- 虚拟环境 ---
+venv/
+env/
+ENV/
+
+# --- 数据库 ---
+*.sqlite3
+*.db
