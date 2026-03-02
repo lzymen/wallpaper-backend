@@ -1,9 +1,9 @@
 # app/api/v1/endpoints/wallpapers.py
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Query, Response,HTTPException
 from typing import List, Optional
 import httpx
 from app.services.wallpaper_service import WallpaperService
-from app.schemas.wallpaper import WallpaperRead
+from app.schemas.wallpaper import WallpaperRead, WallpaperDetail
 from app.schemas.base import ResponseModel
 
 router = APIRouter()
@@ -36,3 +36,15 @@ async def image_proxy(url: str = Query(..., description="原始图片地址")):
         except Exception as e:
             print(f"❌ 代理图片失败: {e}")
             return Response(status_code=404, content="Proxy image error")
+
+
+@router.get("/{id}", response_model=ResponseModel[WallpaperDetail])
+async def get_detail(id: str):
+    """根据 ID 获取壁纸详情接口"""
+    service = WallpaperService()
+    detail = await service.get_detail(id)
+
+    if not detail:
+        raise HTTPException(status_code=404, detail="壁纸信息未找到")
+
+    return ResponseModel(data=detail)

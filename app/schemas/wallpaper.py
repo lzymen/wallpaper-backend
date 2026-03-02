@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import List, Optional
 # 壁纸流
 class WallpaperRead(BaseModel):
     """
@@ -14,3 +14,12 @@ class WallpaperRead(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+
+class WallpaperDetail(BaseModel):
+    id: str
+    full_res_url: str
+    thumb_url: str
+    resolution: str
+    file_type: str
+    colors: List[str]
