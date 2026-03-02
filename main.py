@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 # 确保是从正确的 endpoints 路径导入
-from app.api.v1.endpoints import wallpapers,auth,user, upload
+from app.api.v1.endpoints import wallpapers,auth,user, upload,collection
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -28,6 +28,7 @@ app.include_router(wallpapers.router, prefix="/api/v1/wallpapers", tags=["Wallpa
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(upload.router, prefix="/api/v1/upload", tags=["Upload"])
 app.include_router(user.router, prefix="/api/v1/user", tags=["User Profile"])
+app.include_router(collection.router, prefix="/api/v1/collection", tags=["Collection"])
 if __name__ == "__main__":
     # 必须监听 0.0.0.0 才能让局域网内的手机访问
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
