@@ -2,9 +2,13 @@
 from fastapi import APIRouter, Depends, Query, Response,HTTPException
 from typing import List, Optional
 import httpx
+
+from app.models.category import Category
 from app.services.wallpaper_service import WallpaperService
-from app.schemas.wallpaper import WallpaperRead, WallpaperDetail
+from app.schemas.wallpaper import WallpaperRead, WallpaperDetail, WallpaperData
 from app.schemas.base import ResponseModel
+from app.db.session import get_db
+from app.db.session import Session
 
 router = APIRouter()
 
@@ -16,6 +20,25 @@ async def get_wallpapers(
 ):
     """获取推荐壁纸"""
     data = await service.get_recommendations(user_id)
+    return ResponseModel(data=data)
+
+# 3.分类页面走的接口
+@router.get("/classify", response_model=ResponseModel[WallpaperData])
+async def get_wallpapers_by_classify(
+        category_id: int = Query(..., description="分类ID"),
+        page: int = Query(1),
+        db: Session = Depends(get_db),
+        service: WallpaperService = Depends(WallpaperService)
+):
+    """专门用于分类页面的瀑布流加载"""
+    # 1. 根据 ID 找到分类
+    category = db.get(Category, category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="分类不存在")
+
+    # 2. 拿到英文关键词进行搜索
+    search_query = category.desc
+    data = await service.get_wallpapers_list(query=search_query, page=page)
     return ResponseModel(data=data)
 
 # 接口 2：代理接口

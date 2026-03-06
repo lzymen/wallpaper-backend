@@ -23,3 +23,19 @@ class WallpaperDetail(BaseModel):
     resolution: str
     file_type: str
     colors: List[str]
+
+
+
+
+# 分类界面规定
+class WallpaperItem(BaseModel):
+    id: str
+    thumb_url: str
+    full_res_url: str
+    width: int
+    height: int
+
+class WallpaperData(BaseModel):
+    total: int
+    page: int
+    list: List[WallpaperItem]
