@@ -23,7 +23,7 @@ class AuthService:
             try:
                 # 如果你后端访问微信也超时，记得在这里加 proxies 参数
                 resp = await client.get(self.code2session_url, params=params, timeout=10.0)
-                data = resp.json()
+                data = resp.json() # 解析字典或者列表
                 if "openid" not in data:
                     print(f"微信返回错误: {data}")
                 return data.get("openid")

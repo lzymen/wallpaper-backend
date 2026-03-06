@@ -1,4 +1,6 @@
 # app/services/wallpaper_service.py
+import asyncio
+
 import httpx
 from typing import List, Optional
 from app.core.config import settings
@@ -74,3 +76,31 @@ class WallpaperService:
                 "file_type": raw_data.get("file_type"),
                 "colors": raw_data.get("colors")
             }
+
+    async def get_batch_details(self, wallpaper_ids: list[str]):
+        """并发获取多张壁纸详情，解决搜索接口返回空的问题"""
+        if not wallpaper_ids:
+            return []
+
+        # 1. 为每个 ID 创建一个任务，调用我们之前写好的 get_detail
+        # 这样可以确保每张图都走一遍完整的详情获取逻辑（包含代理包装）
+        tasks = [self.get_detail(wid) for wid in wallpaper_ids]
+
+        # 2. 使用 asyncio.gather 同时启动所有请求
+        # return_exceptions=True 防止其中一个 ID 挂了导致全部崩溃
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # 3. 过滤掉失败的请求（None 或 异常对象）
+        valid_results = []
+        for res in results:
+            if res and isinstance(res, dict):
+                # 我们只需要列表页需要的字段，在这里精简一下
+                valid_results.append({
+                    "id": res.get("id"),
+                    "thumb_url": res.get("thumb_url"),
+                    "full_res_url": res.get("full_res_url"),
+                    "width": int(res.get("resolution", "0x0").split('x')[0]),  # 从 "1920x1080" 提取宽度
+                    "height": int(res.get("resolution", "0x0").split('x')[1])  # 提取高度
+                })
+
+        return valid_results
