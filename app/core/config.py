@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     # JWT 签名密钥（随便写一串随机字符）
     JWT_SECRET: str = "wallflow_secret_key_2026"
     JWT_ALGORITHM: str = "HS256"
+    BAIDU_APPID: str = "20250709002401583"
+    BAIDU_APPKEY: str = "_H4bCcTi9ySh2I7B6c7b"
     model_config = SettingsConfigDict(
         env_file=str(ENV_PATH),
         env_file_encoding='utf-8',
@@ -29,3 +31,4 @@ settings = Settings()
 if __name__ == '__main__':
     print(settings.DATABASE_URL)
     print(settings.WALLHAVEN_API_KEY)
+

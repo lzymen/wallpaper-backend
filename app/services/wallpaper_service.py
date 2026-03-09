@@ -142,8 +142,8 @@ class WallpaperService:
         for item in raw_data:
             clean_list.append({
                 "id": item["id"],
-                "thumb_url": f"{proxy_base}{item['thumbs']['large']}",
-                "full_res_url": f"{proxy_base}{item['path']}",
+                "thumb": f"{proxy_base}{item['thumbs']['large']}",
+                "full": f"{proxy_base}{item['path']}",
                 "width": item["dimension_x"],
                 "height": item["dimension_y"]
             })
@@ -152,4 +152,48 @@ class WallpaperService:
             "total": meta.get("total", 0),
             "page": page,
             "list": clean_list
+        }
+
+    async def search_wallpapers_service(self, query: str, page: int = 1, seed: str = None) -> dict:
+        """
+        独立的搜索服务：专供搜索框使用，支持随机打乱
+        """
+        params = {
+            "apikey": self.api_key,
+            "q": query,
+            "page": page,
+            "sorting": "random",  # ✅ 强制随机排序，保证每次结果不同
+            "seed": seed,  # ✅ 锁定随机种子，确保分页加载时不重复
+            "purity": "100"  # 只获取安全内容
+        }
+        local_ip = "192.168.28.140"
+
+        async with httpx.AsyncClient(proxy=self.proxy_url) as client:
+            try:
+                resp = await client.get(self.base_url, params=params, timeout=15.0)
+                json_data = resp.json()
+                raw_data = json_data.get("data", [])
+                meta = json_data.get("meta", {})
+            except Exception as e:
+                print(f"❌ 搜索请求失败: {e}")
+                return {"total": 0, "page": page, "list": []}
+
+        # 统一包装数据
+        proxy_base = f"http://{local_ip}:8000/api/v1/wallpapers/proxy?url="
+
+        clean_list = []
+        for item in raw_data:
+            clean_list.append({
+                "id": item["id"],
+                "thumb": f"{proxy_base}{item['thumbs']['large']}",  # 使用统一的 thumb 字段
+                "full": f"{proxy_base}{item['path']}",  # 使用统一的 full 字段
+                "width": item["dimension_x"],
+                "height": item["dimension_y"]
+            })
+
+        return {
+            "total": meta.get("total", 0),
+            "page": page,
+            "list": clean_list,
+            "seed": seed  # 把种子传回给前端，方便它下次翻页带回来
         }

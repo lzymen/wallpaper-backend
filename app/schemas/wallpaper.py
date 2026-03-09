@@ -30,8 +30,8 @@ class WallpaperDetail(BaseModel):
 # 分类界面规定
 class WallpaperItem(BaseModel):
     id: str
-    thumb_url: str
-    full_res_url: str
+    thumb: str
+    full: str
     width: int
     height: int
 
